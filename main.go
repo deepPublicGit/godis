@@ -25,7 +25,6 @@ func main() {
 		panic(err)
 	}
 	server.Handle(listen)
-
 }
 
 // Start server
