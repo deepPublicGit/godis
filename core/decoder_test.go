@@ -14,6 +14,43 @@ func TestDecodeSimpleString(t *testing.T) {
 	}
 }
 
+func TestDecodeBulkString(t *testing.T) {
+	cases := map[string]string{
+		"$4\r\nPING\r\n": "PING",
+		"$0\r\n\r\n":     "",
+	}
+	for in, out := range cases {
+		actual, _ := Decode([]byte(in))
+		if actual != out {
+			t.Errorf("Expected %q, Actual %q", out, actual)
+		}
+	}
+}
+
+func TestDecodeArray(t *testing.T) {
+	cases := map[string][]interface{}{
+		"*1\r\n+PING\r\n":                      {"PING"},             //simple string
+		"*1\r\n$4\r\nPING\r\n":                 {"PING"},             //bulk string
+		"*2\r\n$4\r\nPING\r\n+PONG\r\n":        {"PING", "PONG"},     //simple & bulk string
+		"*3\r\n$4\r\nPING\r\n+PONG\r\n:10\r\n": {"PING", "PONG", 10}, //mix
+		"*5\r\n$4\r\nPING\r\n+PONG\r\n:10\r\n*0\r\n*2\r\n$4\r\nPING2\r\n+PONG2\r\n": {"PING", "PONG", 10, []interface{}, {"PING2, PONG2"}}, //mix with array
+		"*0\r\n": {},
+	}
+	for in, out := range cases {
+		actual, _ := Decode([]byte(in))
+		arr := actual.([]interface{})
+		if len(arr) != len(out) {
+			t.Errorf("Length Expected %q, Actual %q", len(out), len(arr))
+		}
+
+		for i := range arr {
+			if arr[i] != out[i] {
+				t.Errorf("Array Expected %q, Actual %q", out[i], arr[i])
+			}
+		}
+	}
+}
+
 func TestDecodeInteger(t *testing.T) {
 	cases := map[string]int{
 		":101\r\n": 101,

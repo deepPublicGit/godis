@@ -5,16 +5,15 @@ import (
 	"strconv"
 )
 
-func Decode(in []byte) (interface{}, error) {
+func Decode(in []byte) (interface{}, int, error) {
 	if len(in) == 0 {
-		return nil, errors.New("empty input")
+		return nil, 0, errors.New("empty input")
 	}
-	out, err := decode(in)
-	return out, err
+	return decode(in)
 }
 
 // https://redis.io/docs/latest/develop/reference/protocol-spec/
-func decode(in []byte) (interface{}, error) {
+func decode(in []byte) (interface{}, int, error) {
 	switch string(in[0]) {
 	case "+":
 		return decodeSimpleString(in)
@@ -24,55 +23,64 @@ func decode(in []byte) (interface{}, error) {
 		return decodeInteger(in)
 	case "$":
 		return decodeBulkString(in)
-		/*	case "*":
-				return decodeArray(in)
-			case "_":
-				return decodeNull(in)*/
+	case "*":
+		return decodeArray(in)
+		/*	case "_":
+			return decodeNull(in)*/
 	}
-	return nil, errors.New("invalid input")
+	return nil, 0, errors.New("invalid input")
 }
 
 /*func decodeNull(in []byte) (interface{}, error) {
 
-}
-
-func decodeArray(in []byte) (interface{}, error) {
-
 }*/
 
-func decodeBulkString(in []byte) (interface{}, error) {
+func decodeArray(in []byte) (interface{}, int, error) {
+	arrayLength, idx, _ := decodeInteger(in)
+
+	var array []interface{} = make([]interface{}, arrayLength.(int))
+	for i := range array {
+		res, nextIdx, err := Decode(in[idx:])
+		if err != nil {
+			return nil, 0, err
+		}
+		array[i] = res
+	}
+}
+
+func decodeBulkString(in []byte) (interface{}, int, error) {
 	idx := getCRLFIdx(in, 1)
 	end, err := strconv.Atoi(string(in[1:idx]))
 	if err != nil {
-		return nil, errors.New("invalid length")
+		return nil, 0, errors.New("invalid length")
 	}
 	idx += 2 //\r\n
 	end += idx
-	return string(in[idx:end]), nil
+	return string(in[idx:end]), end + 2, nil
 }
 
-func decodeInteger(in []byte) (interface{}, error) {
+func decodeInteger(in []byte) (interface{}, int, error) {
 	idx := 1
 	idx = getCRLFIdx(in, idx)
 	res, err := strconv.Atoi(string(in[1:idx]))
 	if err != nil {
-		return nil, errors.New("invalid integer")
+		return nil, idx + 2, errors.New("invalid integer")
 	}
-	return res, nil
+	return res, idx + 2, nil
 }
 
-func decodeSimpleError(in []byte) (interface{}, error) {
+func decodeSimpleError(in []byte) (interface{}, int, error) {
 	idx := 1
 	idx = getCRLFIdx(in, idx)
 
-	return nil, errors.New(string(in[1:idx]))
+	return nil, idx + 2, errors.New(string(in[1:idx]))
 }
 
-func decodeSimpleString(in []byte) (interface{}, error) {
+func decodeSimpleString(in []byte) (interface{}, int, error) {
 	idx := 1
 	idx = getCRLFIdx(in, idx)
 
-	return string(in[1:idx]), nil
+	return string(in[1:idx]), idx + 2, nil
 }
 
 func getCRLFIdx(in []byte, idx int) int {
