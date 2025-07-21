@@ -38,14 +38,16 @@ func decode(in []byte) (interface{}, int, error) {
 func decodeArray(in []byte) (interface{}, int, error) {
 	arrayLength, idx, _ := decodeInteger(in)
 
-	var array []interface{} = make([]interface{}, arrayLength.(int))
+	array := make([]interface{}, arrayLength.(int))
 	for i := range array {
 		res, nextIdx, err := Decode(in[idx:])
 		if err != nil {
 			return nil, 0, err
 		}
 		array[i] = res
+		idx = nextIdx
 	}
+	return array, idx, nil
 }
 
 func decodeBulkString(in []byte) (interface{}, int, error) {
@@ -70,10 +72,7 @@ func decodeInteger(in []byte) (interface{}, int, error) {
 }
 
 func decodeSimpleError(in []byte) (interface{}, int, error) {
-	idx := 1
-	idx = getCRLFIdx(in, idx)
-
-	return nil, idx + 2, errors.New(string(in[1:idx]))
+	return decodeSimpleString(in)
 }
 
 func decodeSimpleString(in []byte) (interface{}, int, error) {
