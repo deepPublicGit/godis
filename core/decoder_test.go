@@ -1,6 +1,9 @@
 package core
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestDecodeSimpleString(t *testing.T) {
 	cases := map[string]string{
@@ -57,7 +60,9 @@ func TestDecodeArray(t *testing.T) {
 		"*1\r\n$4\r\nPING\r\n":                 {"PING"},             //bulk string
 		"*2\r\n$4\r\nPING\r\n+PONG\r\n":        {"PING", "PONG"},     //simple & bulk string
 		"*3\r\n$4\r\nPING\r\n+PONG\r\n:10\r\n": {"PING", "PONG", 10}, //mix
-		"*5\r\n$4\r\nPING\r\n+PONG\r\n:10\r\n*0\r\n*2\r\n$4\r\nPING2\r\n+PONG2\r\n": {"PING", "PONG", 10, []interface{}{}, []interface{}{"PING2, PONG2"}}, //mix with array
+		"*5\r\n$4\r\nPING\r\n+PONG\r\n:10\r\n*0\r\n*2\r\n$5\r\nPING2\r\n+PONG2\r\n": {
+			"PING", "PONG", 10, []interface{}{}, []interface{}{"PING2", "PONG2"},
+		}, //mix with array
 		"*0\r\n": {},
 	}
 
@@ -69,7 +74,7 @@ func TestDecodeArray(t *testing.T) {
 		}
 
 		for i := range arr {
-			if arr[i] != out[i] {
+			if fmt.Sprint(arr[i]) != fmt.Sprint(out[i]) {
 				t.Errorf("Array Expected %q, Actual %q", out[i], arr[i])
 			}
 		}

@@ -17,12 +17,12 @@ func decode(in []byte) (interface{}, int, error) {
 	switch string(in[0]) {
 	case "+":
 		return decodeSimpleString(in)
+	case "$":
+		return decodeBulkString(in)
 	case "-":
 		return decodeSimpleError(in)
 	case ":":
 		return decodeInteger(in)
-	case "$":
-		return decodeBulkString(in)
 	case "*":
 		return decodeArray(in)
 		/*	case "_":
@@ -35,19 +35,11 @@ func decode(in []byte) (interface{}, int, error) {
 
 }*/
 
-func decodeArray(in []byte) (interface{}, int, error) {
-	arrayLength, idx, _ := decodeInteger(in)
+func decodeSimpleString(in []byte) (interface{}, int, error) {
+	idx := 1
+	idx = getCRLFIdx(in, idx)
 
-	array := make([]interface{}, arrayLength.(int))
-	for i := range array {
-		res, nextIdx, err := Decode(in[idx:])
-		if err != nil {
-			return nil, 0, err
-		}
-		array[i] = res
-		idx = nextIdx
-	}
-	return array, idx, nil
+	return string(in[1:idx]), idx + 2, nil
 }
 
 func decodeBulkString(in []byte) (interface{}, int, error) {
@@ -61,6 +53,10 @@ func decodeBulkString(in []byte) (interface{}, int, error) {
 	return string(in[idx:end]), end + 2, nil
 }
 
+func decodeSimpleError(in []byte) (interface{}, int, error) {
+	return decodeSimpleString(in)
+}
+
 func decodeInteger(in []byte) (interface{}, int, error) {
 	idx := 1
 	idx = getCRLFIdx(in, idx)
@@ -71,15 +67,19 @@ func decodeInteger(in []byte) (interface{}, int, error) {
 	return res, idx + 2, nil
 }
 
-func decodeSimpleError(in []byte) (interface{}, int, error) {
-	return decodeSimpleString(in)
-}
+func decodeArray(in []byte) (interface{}, int, error) {
+	arrayLength, idx, _ := decodeInteger(in)
 
-func decodeSimpleString(in []byte) (interface{}, int, error) {
-	idx := 1
-	idx = getCRLFIdx(in, idx)
-
-	return string(in[1:idx]), idx + 2, nil
+	array := make([]interface{}, arrayLength.(int))
+	for i := range array {
+		res, nextIdx, err := Decode(in[idx:])
+		if err != nil {
+			return nil, 0, err
+		}
+		array[i] = res
+		idx += nextIdx
+	}
+	return array, idx, nil
 }
 
 func getCRLFIdx(in []byte, idx int) int {
