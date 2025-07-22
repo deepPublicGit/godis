@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+	"godis/core"
 	"log"
 	"net"
 )
@@ -35,7 +37,12 @@ func readConnection(conn net.Conn) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(buffer[:size]), nil
+	decoded, _, err := core.Decode(buffer[:size])
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprint(decoded), nil
 }
 
 func writeConnection(conn net.Conn, read string) error {
