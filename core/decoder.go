@@ -5,7 +5,14 @@ import (
 	"strconv"
 )
 
-func Decode(in []byte) (interface{}, int, error) {
+func DecodeCommands(in []byte) ([]string, error) {
+	if len(in) == 0 {
+		return nil, errors.New("empty input")
+	}
+	return nil, nil
+}
+
+func Decode(in []byte) (any, int, error) {
 	if len(in) == 0 {
 		return nil, 0, errors.New("empty input")
 	}
@@ -13,7 +20,7 @@ func Decode(in []byte) (interface{}, int, error) {
 }
 
 // https://redis.io/docs/latest/develop/reference/protocol-spec/
-func decode(in []byte) (interface{}, int, error) {
+func decode(in []byte) (any, int, error) {
 	switch string(in[0]) {
 	case "+":
 		return decodeSimpleString(in)
@@ -31,18 +38,18 @@ func decode(in []byte) (interface{}, int, error) {
 	return nil, 0, errors.New("invalid input")
 }
 
-/*func decodeNull(in []byte) (interface{}, error) {
+/*func decodeNull(in []byte) (any, error) {
 
 }*/
 
-func decodeSimpleString(in []byte) (interface{}, int, error) {
+func decodeSimpleString(in []byte) (any, int, error) {
 	idx := 1
 	idx = getCRLFIdx(in, idx)
 
 	return string(in[1:idx]), idx + 2, nil
 }
 
-func decodeBulkString(in []byte) (interface{}, int, error) {
+func decodeBulkString(in []byte) (any, int, error) {
 	idx := getCRLFIdx(in, 1)
 	end, err := strconv.Atoi(string(in[1:idx]))
 	if err != nil {
@@ -53,11 +60,11 @@ func decodeBulkString(in []byte) (interface{}, int, error) {
 	return string(in[idx:end]), end + 2, nil
 }
 
-func decodeSimpleError(in []byte) (interface{}, int, error) {
+func decodeSimpleError(in []byte) (any, int, error) {
 	return decodeSimpleString(in)
 }
 
-func decodeInteger(in []byte) (interface{}, int, error) {
+func decodeInteger(in []byte) (any, int, error) {
 	idx := 1
 	idx = getCRLFIdx(in, idx)
 	res, err := strconv.Atoi(string(in[1:idx]))
@@ -67,10 +74,10 @@ func decodeInteger(in []byte) (interface{}, int, error) {
 	return res, idx + 2, nil
 }
 
-func decodeArray(in []byte) (interface{}, int, error) {
+func decodeArray(in []byte) (any, int, error) {
 	arrayLength, idx, _ := decodeInteger(in)
 
-	array := make([]interface{}, arrayLength.(int))
+	array := make([]any, arrayLength.(int))
 	for i := range array {
 		res, nextIdx, err := Decode(in[idx:])
 		if err != nil {

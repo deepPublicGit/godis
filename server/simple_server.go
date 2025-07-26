@@ -1,10 +1,10 @@
 package server
 
 import (
-	"fmt"
 	"godis/core"
 	"log"
 	"net"
+	"strings"
 )
 
 func Handle(listener net.Listener) {
@@ -16,33 +16,43 @@ func Handle(listener net.Listener) {
 		log.Print("[STARTED] PROCESSING CLIENT ", conn.RemoteAddr())
 
 		for {
-			read, err := readConnection(conn)
+			commands, err := readCommands(conn)
 			if err != nil {
 				conn.Close()
-				log.Print("[ERROR] READING CLIENT ", conn.RemoteAddr())
+				log.Print("[ERROR] READING CLIENT ", conn.RemoteAddr(), err)
 
 				break
 			}
-			log.Print("[DEBUG] CLIENT INPUT: ", read)
-			if err = writeConnection(conn, read); err != nil {
-				log.Print("[ERROR] RESPONDING CLIENT ", conn.RemoteAddr(), read)
+			output, err := core.Eval(commands)
+			if err != nil {
+				err := writeConnection(conn, err.Error())
+				if err != nil {
+					log.Print("[ERROR] RESPONDING CLIENT ", conn.RemoteAddr(), err)
+				}
+			}
+			log.Print("[DEBUG] CLIENT INPUT: ", output)
+			if err = writeConnection(conn, output); err != nil {
+				log.Print("[ERROR] RESPONDING CLIENT ", conn.RemoteAddr(), output)
 			}
 		}
 	}
 }
 
-func readConnection(conn net.Conn) (string, error) {
+func readCommands(conn net.Conn) (*core.RedisCommands, error) {
 	buffer := make([]byte, 256)
 	size, err := conn.Read(buffer)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	decoded, _, err := core.Decode(buffer[:size])
+	commands, err := core.DecodeCommands(buffer[:size])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprint(decoded), nil
+	return &core.RedisCommands{
+		Cmd:  strings.ToUpper(commands[0]),
+		Args: commands[1:],
+	}, nil
 }
 
 func writeConnection(conn net.Conn, read string) error {
