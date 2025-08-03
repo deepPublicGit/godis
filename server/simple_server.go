@@ -25,15 +25,10 @@ func Handle(listener net.Listener) {
 			}
 			output, err := core.Eval(commands)
 			if err != nil {
-				err := writeConnection(conn, err.Error())
-				if err != nil {
-					log.Print("[ERROR] RESPONDING CLIENT ", conn.RemoteAddr(), err)
-				}
+				writeConnection(conn, err)
 			}
 			log.Print("[DEBUG] CLIENT INPUT: ", output)
-			if err = writeConnection(conn, output); err != nil {
-				log.Print("[ERROR] RESPONDING CLIENT ", conn.RemoteAddr(), output)
-			}
+			writeConnection(conn, output)
 		}
 	}
 }
@@ -55,10 +50,12 @@ func readCommands(conn net.Conn) (*core.RedisCommands, error) {
 	}, nil
 }
 
-func writeConnection(conn net.Conn, read string) error {
-	_, err := conn.Write([]byte("SERVER: " + read))
+func writeConnection(conn net.Conn, read any) {
+	encoded, err := core.Encode(read, true)
 	if err != nil {
-		return err
+		log.Print("[ERROR] WRITING CLIENT ", conn.RemoteAddr(), err)
+		out, _ := core.Encode(err, true)
+		conn.Write(out)
 	}
-	return nil
+	conn.Write(encoded)
 }

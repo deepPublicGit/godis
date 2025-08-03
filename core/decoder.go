@@ -10,8 +10,13 @@ func DecodeCommands(in []byte) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	commands, ok := val.([]string)
-	return nil, nil
+
+	commands := make([]string, len(val.([]any)))
+	for i, v := range val.([]any) {
+		commands[i] = v.(string)
+	}
+
+	return commands, err
 }
 
 func Decode(in []byte) (any, int, error) {

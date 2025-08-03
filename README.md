@@ -62,9 +62,9 @@ This project is in early development. The basic server structure is in place, bu
 - [ ] Implement proper error handling
 - [ ] Add comprehensive tests
 - [ ] Add benchmarking
+- [ ] Add Redis CLI using Charm / Bubble Tea
 - [ ] Add persistence options
-- [ ] Add replication features
-- [ ] Add clustering capabilities
+- [ ] Add transactions
 - [ ] Improve documentation
 
 
