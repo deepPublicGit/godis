@@ -6,9 +6,11 @@ import (
 )
 
 func DecodeCommands(in []byte) ([]string, error) {
-	if len(in) == 0 {
-		return nil, errors.New("empty input")
+	val, _, err := Decode(in)
+	if err != nil {
+		return nil, err
 	}
+	commands, ok := val.([]string)
 	return nil, nil
 }
 
