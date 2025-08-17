@@ -20,5 +20,3 @@ func main() {
 		server.HandleAsync()
 	}
 }
-
-// Start server

@@ -12,7 +12,6 @@ import (
 func HandleSync() {
 
 	log.Printf("Listening sync on %s:%d", Host, Port)
-
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", Host, Port))
 
 	if err != nil {

@@ -1,42 +1,39 @@
 package server
 
 import (
-	"fmt"
 	"godis/core"
 	"log"
-	"net"
+	"syscall"
 )
 
 func HandleAsync() {
 
 	log.Printf("Listening async on %s:%d", Host, Port)
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", Host, Port))
+
+	events := make([]syscall.EpollEvent, 100)
+	fd, err := syscall.Socket(syscall.AF_INET, syscall.O_NONBLOCK|syscall.SOCK_STREAM, 0)
 
 	if err != nil {
 		panic(err)
 	}
 
+	defer syscall.Close(fd)
+
+	log.Print("[STARTED] PROCESSING CLIENT ", conn.RemoteAddr())
+
 	for {
-		conn, err := listener.Accept()
+		commands, err := readCommands(conn)
 		if err != nil {
-			panic(err)
-		}
-		log.Print("[STARTED] PROCESSING CLIENT ", conn.RemoteAddr())
+			conn.Close()
+			log.Print("[ERROR] READING CLIENT ", conn.RemoteAddr(), err)
 
-		for {
-			commands, err := readCommands(conn)
-			if err != nil {
-				conn.Close()
-				log.Print("[ERROR] READING CLIENT ", conn.RemoteAddr(), err)
-
-				break
-			}
-			output, err := core.Eval(commands)
-			if err != nil {
-				writeConnection(conn, err)
-			}
-			log.Print("[DEBUG] CLIENT INPUT: ", output)
-			writeConnection(conn, output)
+			break
 		}
+		output, err := core.Eval(commands)
+		if err != nil {
+			writeConnection(conn, err)
+		}
+		log.Print("[DEBUG] CLIENT INPUT: ", output)
+		writeConnection(conn, output)
 	}
 }
