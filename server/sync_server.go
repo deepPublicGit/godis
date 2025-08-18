@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"godis/core"
+	"io"
 	"log"
 	"net"
 	"strings"
@@ -43,7 +44,7 @@ func HandleSync() {
 	}
 }
 
-func readCommands(conn net.Conn) (*core.RedisCommands, error) {
+func readCommands(conn io.ReadWriter) (*core.RedisCommands, error) {
 	buffer := make([]byte, 256)
 	size, err := conn.Read(buffer)
 	if err != nil {
@@ -60,10 +61,10 @@ func readCommands(conn net.Conn) (*core.RedisCommands, error) {
 	}, nil
 }
 
-func writeConnection(conn net.Conn, read any) {
+func writeConnection(conn io.ReadWriter, read any) {
 	encoded, err := core.Encode(read, true)
 	if err != nil {
-		log.Print("[ERROR] WRITING CLIENT ", conn.RemoteAddr(), err)
+		log.Print("[ERROR] WRITING CLIENT ", conn, err)
 		out, _ := core.Encode(err, true)
 		conn.Write(out)
 	}
