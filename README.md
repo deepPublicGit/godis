@@ -1,6 +1,6 @@
 # Godis
 
-A Redis-like server implementation in Go.
+A Redis server implementation in Go.
 
 ## Description
 
