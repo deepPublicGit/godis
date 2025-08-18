@@ -41,10 +41,12 @@ This project is in early development. The basic server structure is in place, bu
 
 ## Todo List
 
-- [ ] Fix bugs in the RESP decoder:
+- [x] Fix bugs in the RESP decoder:
   - [ ] Fix DecodeCommands function which currently always returns nil
-- [ ] Implement RESP encoder for proper response formatting
-- [ ] Implement command evaluation logic
+- [x] Implement async server based on eventloop
+- [ ] Add support for windows based on IOCP
+- [x] Implement RESP encoder for proper response formatting
+- [x] Implement command evaluation logic
 - [ ] Add data storage functionality
 - [ ] Implement basic Redis commands:
   - [ ] GET
