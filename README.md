@@ -42,7 +42,7 @@ This project is in early development. The basic server structure is in place, bu
 ## Todo List
 
 - [x] Fix bugs in the RESP decoder:
-  - [ ] Fix DecodeCommands function which currently always returns nil
+  - [x] Fix DecodeCommands function which currently always returns nil
 - [x] Implement async server based on eventloop
 - [ ] Add support for windows based on IOCP
 - [x] Implement RESP encoder for proper response formatting
