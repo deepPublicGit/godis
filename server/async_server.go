@@ -4,14 +4,12 @@ import (
 	"log"
 	"net"
 	"syscall"
-
-	"golang.org/x/sys/windows"
 )
 
 func HandleAsync() {
 
-	log.Printf("Listening async on %s:%d", Host, Port)
-	events := make([]windows.Handle, MAX_CLIENTS)
+	log.Printf("Listening async on %s:%d with max clients:%d", Host, Port, MAX_CLIENTS)
+	events := make([]syscall.EpollEvent, MAX_CLIENTS)
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.O_NONBLOCK|syscall.SOCK_STREAM, 0)
 
 	if err != nil {
@@ -37,13 +35,10 @@ func HandleAsync() {
 		panic(err)
 	}
 
-	iocpFd, err := windows.CreateIoCompletionPort(windows.Handle(fd), 0, 0, 0)
+	epollFd, err := syscall.EpollCreate1(0)
 	if err != nil {
 		panic(err)
 	}
-	defer windows.Close(iocpFd)
-
-	windows.
-		log.Print("[STARTED] PROCESSING CLIENT ", conn.RemoteAddr())
+	defer syscall.Close(epollFd)
 
 }
