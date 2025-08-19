@@ -4,6 +4,7 @@ import (
 	"errors"
 	"godis/core/structs"
 	"strconv"
+	"time"
 )
 
 func Eval(commands *structs.RedisCommands) (any, error) {
@@ -104,12 +105,19 @@ func evalDEL(args []string) (string, error) {
 }
 
 func evalTTL(args []string) (string, error) {
-	if len(args) > 1 {
-		return "", errors.New("invalid number of arguments")
+	if len(args) <= 1 {
+		return "", errors.New("invalid number of arguments for TTL")
 	}
-	if len(args) == 0 {
-		return "PONG", nil
-	} else {
-		return "PONG " + args[0], nil
+	key := args[1]
+	redisObject, ok := structs.Get(key)
+	if ok {
+		if redisObject.ExpiresAt == -1 {
+			return "-1", nil
+		}
+		ttl := (redisObject.ExpiresAt - time.Now().UnixMilli()) / 1000
+		if ttl > 0 {
+			return strconv.FormatInt(ttl, 10), nil
+		}
 	}
+	return "-2", nil
 }
