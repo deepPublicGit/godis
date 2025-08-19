@@ -54,7 +54,6 @@ This project is in early development. The basic server structure is in place, bu
   - [ ] SET
   - [ ] DEL
   - [ ] TTL
-  - [ ] EXISTS
   - [ ] INCR/DECR
   - [ ] EXPIRE
 - [ ] Add support for data types:
