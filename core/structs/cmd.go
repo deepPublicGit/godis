@@ -1,4 +1,4 @@
-package core
+package structs
 
 type RedisCommands struct {
 	Cmd  string

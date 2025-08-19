@@ -2,6 +2,7 @@ package server
 
 import (
 	"godis/core"
+	"godis/core/structs"
 	"log"
 	"net"
 	"syscall"
@@ -14,13 +15,13 @@ func HandleAsync() {
 	sfd, err := syscall.Socket(syscall.AF_INET, syscall.O_NONBLOCK|syscall.SOCK_STREAM, 0)
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	defer syscall.Close(sfd)
 
 	if err = syscall.SetNonblock(sfd, true); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	ipv4 := net.ParseIP(Host)
@@ -29,16 +30,16 @@ func HandleAsync() {
 		Port: Port,
 		Addr: [4]byte{ipv4[0], ipv4[1], ipv4[2], ipv4[3]},
 	}); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if err = syscall.Listen(sfd, MAX_CLIENTS); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	epfd, err := syscall.EpollCreate1(0)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer syscall.Close(epfd)
 
@@ -60,7 +61,7 @@ func HandleAsync() {
 				registerEvent(nsfd, epfd)
 
 			} else {
-				fdconn := core.FdConn{Fd: int(events[i].Fd)}
+				fdconn := structs.FdConn{Fd: int(events[i].Fd)}
 				cmds, err := readCommands(fdconn)
 				if err != nil {
 					log.Print(err)
@@ -85,6 +86,6 @@ func registerEvent(sfd int, epfd int) {
 	}
 
 	if err := syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, sfd, &socketEvent); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }

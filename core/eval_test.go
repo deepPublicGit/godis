@@ -1,13 +1,14 @@
 package core
 
 import (
+	"godis/core/structs"
 	"testing"
 )
 
 func TestEvalPingValidCases(t *testing.T) {
-	cases := map[*RedisCommands]string{
-		&RedisCommands{Cmd: "PING", Args: nil}:            "PONG",
-		&RedisCommands{Cmd: "PING", Args: []string{"OK"}}: "PONG OK",
+	cases := map[*structs.RedisCommands]string{
+		&structs.RedisCommands{Cmd: "PING", Args: nil}:            "PONG",
+		&structs.RedisCommands{Cmd: "PING", Args: []string{"OK"}}: "PONG OK",
 	}
 	for in, out := range cases {
 		actual, err := Eval(in)
@@ -21,9 +22,9 @@ func TestEvalPingValidCases(t *testing.T) {
 }
 
 func TestEvalPingInvalidCases(t *testing.T) {
-	cases := map[*RedisCommands]string{
-		&RedisCommands{Cmd: "PONG", Args: nil}:                       "invalid command",
-		&RedisCommands{Cmd: "PING", Args: []string{"OKIE", "DOKIE"}}: "invalid number of arguments",
+	cases := map[*structs.RedisCommands]string{
+		&structs.RedisCommands{Cmd: "PONG", Args: nil}:                       "invalid command",
+		&structs.RedisCommands{Cmd: "PING", Args: []string{"OKIE", "DOKIE"}}: "invalid number of arguments",
 	}
 	for in, out := range cases {
 		actual, err := Eval(in)

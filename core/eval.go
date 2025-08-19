@@ -1,8 +1,11 @@
 package core
 
-import "errors"
+import (
+	"errors"
+	"godis/core/structs"
+)
 
-func Eval(commands *RedisCommands) (string, error) {
+func Eval(commands *structs.RedisCommands) (string, error) {
 	switch commands.Cmd {
 	case "PING":
 		return evalPING(commands.Args)

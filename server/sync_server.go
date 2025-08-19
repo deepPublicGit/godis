@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"godis/core"
+	"godis/core/structs"
 	"io"
 	"log"
 	"net"
@@ -44,7 +45,7 @@ func HandleSync() {
 	}
 }
 
-func readCommands(conn io.ReadWriter) (*core.RedisCommands, error) {
+func readCommands(conn io.ReadWriter) (*structs.RedisCommands, error) {
 	buffer := make([]byte, 256)
 	size, err := conn.Read(buffer)
 	if err != nil {
@@ -55,7 +56,7 @@ func readCommands(conn io.ReadWriter) (*core.RedisCommands, error) {
 		return nil, err
 	}
 
-	return &core.RedisCommands{
+	return &structs.RedisCommands{
 		Cmd:  strings.ToUpper(commands[0]),
 		Args: commands[1:],
 	}, nil

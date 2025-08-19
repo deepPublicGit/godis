@@ -43,6 +43,7 @@ This project is in early development. The basic server structure is in place, bu
 
 - [x] Fix bugs in the RESP decoder:
   - [x] Fix DecodeCommands function which currently always returns nil
+  - [ ] Fix panics
 - [x] Implement async server based on eventloop
 - [ ] Add support for windows based on IOCP
 - [x] Implement RESP encoder for proper response formatting
@@ -52,6 +53,7 @@ This project is in early development. The basic server structure is in place, bu
   - [ ] GET
   - [ ] SET
   - [ ] DEL
+  - [ ] TTL
   - [ ] EXISTS
   - [ ] INCR/DECR
   - [ ] EXPIRE
