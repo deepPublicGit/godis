@@ -48,14 +48,16 @@ This project is in early development. The basic server structure is in place, bu
 - [ ] Add support for windows based on IOCP
 - [x] Implement RESP encoder for proper response formatting
 - [x] Implement command evaluation logic
-- [ ] Add data storage functionality
+- [x] Add data storage functionality
 - [ ] Implement basic Redis commands:
-  - [ ] GET
-  - [ ] SET
-  - [ ] DEL
+  - [x] GET
+  - [x] SET
+  - [x] DEL
   - [ ] TTL
-  - [ ] INCR/DECR
-  - [ ] EXPIRE
+  - [x] INCR
+  - [ ] DECR
+  - [x] EXPIRE
+- [ ] Improve Naive Implementation of Delete
 - [ ] Add support for data types:
   - [x] Strings
   - [ ] Lists

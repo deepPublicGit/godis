@@ -3,9 +3,10 @@ package core
 import (
 	"errors"
 	"godis/core/structs"
+	"strconv"
 )
 
-func Eval(commands *structs.RedisCommands) (string, error) {
+func Eval(commands *structs.RedisCommands) (any, error) {
 	switch commands.Cmd {
 	case "PING":
 		return evalPING(commands.Args)
@@ -14,7 +15,9 @@ func Eval(commands *structs.RedisCommands) (string, error) {
 	case "SET":
 		return evalSET(commands.Args)
 	case "INCR":
-		return evalINCR(commands.Args)
+		return evalADD(commands.Args, 1)
+	case "DECR":
+		return evalADD(commands.Args, -1)
 	case "DEL":
 		return evalDEL(commands.Args)
 	case "TTL":
@@ -35,48 +38,69 @@ func evalPING(args []string) (string, error) {
 	}
 }
 
-func evalGET(args []string) (string, error) {
-	if len(args) > 1 {
-		return "", errors.New("invalid number of arguments")
+func evalGET(args []string) (any, error) {
+	if len(args) <= 1 {
+		return "", errors.New("invalid number of arguments for GET")
 	}
-	if len(args) == 0 {
-		return "PONG", nil
-	} else {
-		return "PONG " + args[0], nil
+	key := args[0]
+	redisObject, ok := structs.Get(key)
+	if ok {
+		return redisObject, nil
 	}
+	return "-1", nil
 }
 
 func evalSET(args []string) (string, error) {
-	if len(args) > 1 {
-		return "", errors.New("invalid number of arguments")
+	if len(args) <= 1 {
+		return "", errors.New("invalid number of arguments for SET")
 	}
-	if len(args) == 0 {
-		return "PONG", nil
-	} else {
-		return "PONG " + args[0], nil
+
+	key, val, expMs := args[0], args[1], int64(-1)
+	for i := 2; i < len(args); i++ {
+		switch args[i] {
+		case "EX":
+			i++
+			if i >= len(args) {
+				return "", errors.New("expiry value missing for EX")
+			}
+
+			expS, err := strconv.ParseInt(args[i+1], 10, 64)
+			if err != nil {
+				return "", errors.New("invalid or out of range expiry value")
+			}
+			expMs = expS * 1000
+		default:
+			return "", errors.New("invalid argument")
+		}
 	}
+	structs.Set(key, structs.NewRedisObject(val, expMs))
+	return "OK", nil
 }
 
-func evalINCR(args []string) (string, error) {
-	if len(args) > 1 {
-		return "", errors.New("invalid number of arguments")
+// evalINCR op indicates value to add or subtract
+func evalADD(args []string, op int) (string, error) {
+	if len(args) <= 1 {
+		return "", errors.New("invalid number of arguments for INCR")
 	}
-	if len(args) == 0 {
-		return "PONG", nil
-	} else {
-		return "PONG " + args[0], nil
+	key := args[1]
+	redisObject, ok := structs.Get(key)
+	if ok {
+		val := redisObject.Value.(string)
+		incr, err := strconv.Atoi(val)
+		if err != nil {
+			return evalSET([]string{key, "1"})
+		}
+		return evalSET([]string{key, strconv.Itoa(incr + op)})
 	}
+	return evalSET([]string{key, "1"})
 }
 
 func evalDEL(args []string) (string, error) {
-	if len(args) > 1 {
-		return "", errors.New("invalid number of arguments")
+	if len(args) <= 1 {
+		return "", errors.New("invalid number of arguments for DEL")
 	}
-	if len(args) == 0 {
-		return "PONG", nil
-	} else {
-		return "PONG " + args[0], nil
-	}
+	structs.Del(args[1])
+	return "OK", nil
 }
 
 func evalTTL(args []string) (string, error) {
