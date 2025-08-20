@@ -1,6 +1,8 @@
 package structs
 
 import (
+	"godis/config"
+	"log"
 	"time"
 )
 
@@ -33,4 +35,25 @@ func Del(key string) bool {
 		return true
 	}
 	return false
+}
+
+// DelExpiredKeys delete sample percentage of fixed keys, repeat until expired keys less than sample.
+func DelExpiredKeys(samplePercentage int) {
+	sample := float32(samplePercentage / 100)
+	for deleteSample() > sample {
+
+	}
+	log.Printf("DelExpiredKeys finished: %d keys remaining", len(redisMap))
+}
+
+// Redis calculates % of sampled deleted from a fixed limit (20)
+func deleteSample() float32 {
+	keysDeleted := 0
+	for key, redisObject := range redisMap {
+		if redisObject.ExpiresAt != -1 && redisObject.ExpiresAt <= time.Now().UnixMilli() {
+			delete(redisMap, key)
+			keysDeleted++
+		}
+	}
+	return float32(keysDeleted) / float32(config.ExpiryLimit)
 }

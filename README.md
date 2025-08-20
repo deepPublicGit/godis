@@ -49,7 +49,7 @@ This project is in early development. The basic server structure is in place, bu
 - [x] Implement RESP encoder for proper response formatting
 - [x] Implement command evaluation logic
 - [x] Add data storage functionality
-- [ ] Implement basic Redis commands:
+- [x] Implement basic Redis commands:
   - [x] GET
   - [x] SET
   - [x] DEL
@@ -57,14 +57,21 @@ This project is in early development. The basic server structure is in place, bu
   - [x] INCR
   - [x] DECR
   - [x] EXPIRE
-- [ ] Improve Naive Implementation of Delete
-- [ ] Add support for data types:
+- [ ] Improve Naive Implementation of Delete & Expiry
+- [ ] Add support for Eviction Policies
+    - [ ] LRU
+    - [ ] LFU
+    - [ ] Approximate LRU
+    - [ ] Fixed
+- [ ] Add config file and refactor argument flags
+- [ ] Add support for data types/structures:
   - [x] Strings
   - [ ] Lists
-  - [ ] Sets
-  - [ ] Hashes
-  - [ ] Sorted sets
-- [ ] Implement proper error handling
+  - [ ] Sorted Sets
+  - [ ] Geo Hash
+  - [ ] HyperLogLog
+- [ ] Improve Naive Implementation of Delete & Expiry
+- [ ] Improve error handling
 - [ ] Add comprehensive tests
 - [ ] Add benchmarking
 - [ ] Add Redis CLI using Charm / Bubble Tea

@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"godis/config"
 	"godis/core"
 	"log"
 	"net"
@@ -10,8 +11,8 @@ import (
 // HandleSync For local testing only
 func HandleSync() {
 
-	log.Printf("Listening sync on %s:%d", Host, Port)
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", Host, Port))
+	log.Printf("Listening sync on %s:%d", config.Host, config.Port)
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Host, config.Port))
 
 	if err != nil {
 		panic(err)

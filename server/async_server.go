@@ -1,17 +1,21 @@
 package server
 
 import (
+	"godis/config"
 	"godis/core"
 	"godis/core/structs"
 	"log"
 	"net"
 	"syscall"
+	"time"
 )
 
 func HandleAsync() {
 
-	log.Printf("Listening async on %s:%d with max clients:%d", Host, Port, MAX_CLIENTS)
-	events := make([]syscall.EpollEvent, MAX_CLIENTS)
+	log.Printf("Listening async on %s:%d with max clients:%d", config.Host, config.Port, config.MAX_CLIENTS)
+	ticker := time.NewTicker(time.Duration(config.ExpiryCron))
+
+	events := make([]syscall.EpollEvent, config.MAX_CLIENTS)
 	sfd, err := syscall.Socket(syscall.AF_INET, syscall.O_NONBLOCK|syscall.SOCK_STREAM, 0)
 
 	if err != nil {
@@ -24,16 +28,16 @@ func HandleAsync() {
 		log.Fatal(err)
 	}
 
-	ipv4 := net.ParseIP(Host)
+	ipv4 := net.ParseIP(config.Host)
 
 	if err = syscall.Bind(sfd, &syscall.SockaddrInet4{
-		Port: Port,
+		Port: config.Port,
 		Addr: [4]byte{ipv4[0], ipv4[1], ipv4[2], ipv4[3]},
 	}); err != nil {
 		log.Fatal(err)
 	}
 
-	if err = syscall.Listen(sfd, MAX_CLIENTS); err != nil {
+	if err = syscall.Listen(sfd, config.MAX_CLIENTS); err != nil {
 		log.Fatal(err)
 	}
 
@@ -46,6 +50,10 @@ func HandleAsync() {
 	registerEvent(sfd, epfd)
 
 	for {
+		select {
+		case <-ticker.C:
+			structs.DelExpiredKeys(config.ExpirySample)
+		}
 		numEvents, err := syscall.EpollWait(epfd, events, -1)
 		if err != nil {
 			log.Fatal(err)
