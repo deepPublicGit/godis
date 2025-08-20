@@ -1,6 +1,8 @@
 package structs
 
-import "time"
+import (
+	"godis/core/utils"
+)
 
 type RedisObject struct {
 	Value     any
@@ -10,7 +12,7 @@ type RedisObject struct {
 func NewRedisObject(val any, expMs int64) *RedisObject {
 	expiresAt := int64(-1)
 	if expMs > 0 {
-		expiresAt = time.Now().UnixMilli() + expMs //32 bit would cause Y2K38
+		expiresAt = utils.GetExpiryInUnixMs(expMs) //32 bit would cause Y2K38
 	}
 	return &RedisObject{
 		Value:     val,

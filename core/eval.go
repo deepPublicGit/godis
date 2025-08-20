@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"godis/core/structs"
+	"godis/core/utils"
 	"strconv"
 	"time"
 )
@@ -23,6 +24,8 @@ func Eval(commands *structs.RedisCommands) (any, error) {
 		return evalDEL(commands.Args)
 	case "TTL":
 		return evalTTL(commands.Args)
+	case "EXPIRE":
+		return evalEXPIRE(commands.Args)
 	default:
 		return "", errors.New("invalid command")
 	}
@@ -96,19 +99,24 @@ func evalADD(args []string, op int) (string, error) {
 	return evalSET([]string{key, "1"})
 }
 
-func evalDEL(args []string) (string, error) {
-	if len(args) <= 1 {
-		return "", errors.New("invalid number of arguments for DEL")
+func evalDEL(args []string) (any, error) {
+	if len(args) < 1 {
+		return "", errors.New("invalid number of keys to delete for DEL")
 	}
-	structs.Del(args[1])
-	return "OK", nil
+	keysDeleted := 0
+	for _, key := range args {
+		if structs.Del(key) {
+			keysDeleted++
+		}
+	}
+	return keysDeleted, nil
 }
 
 func evalTTL(args []string) (string, error) {
-	if len(args) <= 1 {
+	if len(args) < 1 {
 		return "", errors.New("invalid number of arguments for TTL")
 	}
-	key := args[1]
+	key := args[0]
 	redisObject, ok := structs.Get(key)
 	if ok {
 		if redisObject.ExpiresAt == -1 {
@@ -120,4 +128,24 @@ func evalTTL(args []string) (string, error) {
 		}
 	}
 	return "-2", nil
+}
+
+func evalEXPIRE(args []string) (string, error) {
+	if len(args) <= 2 {
+		return "", errors.New("invalid number of arguments for EXPIRE")
+	}
+	key, expS := args[1], args[2]
+	exp, err := strconv.ParseInt(expS, 10, 64)
+
+	if err != nil || exp < -1 {
+		return "-1", errors.New("invalid or out of range expiry value")
+	}
+
+	redisObject, ok := structs.Get(key)
+	if ok {
+		redisObject.ExpiresAt = utils.GetExpiryInUnixMs(exp * 1000)
+		return "1", nil
+	}
+
+	return "0", nil
 }

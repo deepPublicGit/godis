@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func readCommands(conn io.ReadWriter) (*structs.RedisCommands, error) {
+func readClient(conn io.ReadWriter) (*structs.RedisCommands, error) {
 	buffer := make([]byte, 256)
 	size, err := conn.Read(buffer)
 	if err != nil {
@@ -25,7 +25,7 @@ func readCommands(conn io.ReadWriter) (*structs.RedisCommands, error) {
 	}, nil
 }
 
-func writeConnection(conn io.ReadWriter, read any) {
+func writeClient(conn io.ReadWriter, read any) {
 	encoded, err := core.Encode(read, true)
 	if err != nil {
 		log.Print("[ERROR] WRITING CLIENT ", conn, err)

@@ -25,7 +25,7 @@ func HandleSync() {
 		log.Print("[STARTED] PROCESSING CLIENT ", conn.RemoteAddr())
 
 		for {
-			commands, err := readCommands(conn)
+			commands, err := readClient(conn)
 			if err != nil {
 				conn.Close()
 				log.Print("[ERROR] READING CLIENT ", conn.RemoteAddr(), err)
@@ -34,10 +34,10 @@ func HandleSync() {
 			}
 			output, err := core.Eval(commands)
 			if err != nil {
-				writeConnection(conn, err)
+				writeClient(conn, err)
 			}
 			log.Print("[DEBUG] CLIENT INPUT: ", output)
-			writeConnection(conn, output)
+			writeClient(conn, output)
 		}
 	}
 }

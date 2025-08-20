@@ -62,7 +62,7 @@ func HandleAsync() {
 
 			} else {
 				fdconn := structs.FdConn{Fd: int(events[i].Fd)}
-				cmds, err := readCommands(fdconn)
+				cmds, err := readClient(fdconn)
 				if err != nil {
 					log.Print(err)
 					syscall.Close(int(events[i].Fd))
@@ -70,10 +70,10 @@ func HandleAsync() {
 				}
 				output, err := core.Eval(cmds)
 				if err != nil {
-					writeConnection(fdconn, err)
+					writeClient(fdconn, err)
 					continue
 				}
-				writeConnection(fdconn, output)
+				writeClient(fdconn, output)
 			}
 		}
 	}

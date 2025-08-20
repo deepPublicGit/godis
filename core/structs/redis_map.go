@@ -26,6 +26,11 @@ func Set(key string, value *RedisObject) {
 	redisMap[key] = value
 }
 
-func Del(key string) {
-	delete(redisMap, key)
+// Del Invalid keys might be given as inputs.
+func Del(key string) bool {
+	if _, ok := redisMap[key]; ok {
+		delete(redisMap, key)
+		return true
+	}
+	return false
 }

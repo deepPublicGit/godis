@@ -41,7 +41,7 @@ This project is in early development. The basic server structure is in place, bu
 
 ## Todo List
 
-- [x] Fix bugs in the RESP decoder:
+- [ ] Fix bugs in the RESP decoder:
   - [x] Fix DecodeCommands function which currently always returns nil
   - [ ] Fix panics
 - [x] Implement async server based on eventloop
@@ -53,9 +53,9 @@ This project is in early development. The basic server structure is in place, bu
   - [x] GET
   - [x] SET
   - [x] DEL
-  - [ ] TTL
+  - [x] TTL
   - [x] INCR
-  - [ ] DECR
+  - [x] DECR
   - [x] EXPIRE
 - [ ] Improve Naive Implementation of Delete
 - [ ] Add support for data types:
