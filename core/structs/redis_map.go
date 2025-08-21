@@ -6,14 +6,18 @@ import (
 	"time"
 )
 
-var redisMap map[string]*RedisObject
+var RedisStore map[string]*RedisObject
 
-func NewRedisMap() {
-	redisMap = make(map[string]*RedisObject)
+// Evictor is a callback set by the evict package to perform eviction when needed.
+// It is optional to avoid cyclic imports.
+var Evictor func()
+
+func NewRedisStore() {
+	RedisStore = make(map[string]*RedisObject)
 }
 
 func Get(key string) (*RedisObject, bool) {
-	redisObj, ok := redisMap[key]
+	redisObj, ok := RedisStore[key]
 	if !ok {
 		return nil, false
 	}
@@ -25,13 +29,18 @@ func Get(key string) (*RedisObject, bool) {
 }
 
 func Set(key string, value *RedisObject) {
-	redisMap[key] = value
+	if len(RedisStore) >= config.MaxMemory {
+		if Evictor != nil {
+			Evictor()
+		}
+	}
+	RedisStore[key] = value
 }
 
 // Del Invalid keys might be given as inputs.
 func Del(key string) bool {
-	if _, ok := redisMap[key]; ok {
-		delete(redisMap, key)
+	if _, ok := RedisStore[key]; ok {
+		delete(RedisStore, key)
 		return true
 	}
 	return false
@@ -43,15 +52,15 @@ func DelExpiredKeys(samplePercentage int) {
 	for deleteSample() > sample {
 
 	}
-	log.Printf("DelExpiredKeys finished: %d keys remaining", len(redisMap))
+	log.Printf("DelExpiredKeys finished: %d keys remaining", len(RedisStore))
 }
 
 // Redis calculates % of sampled deleted from a fixed limit (20)
 func deleteSample() float32 {
 	keysDeleted := 0
-	for key, redisObject := range redisMap {
+	for key, redisObject := range RedisStore {
 		if redisObject.ExpiresAt != -1 && redisObject.ExpiresAt <= time.Now().UnixMilli() {
-			delete(redisMap, key)
+			delete(RedisStore, key)
 			keysDeleted++
 		}
 	}

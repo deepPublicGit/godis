@@ -14,6 +14,8 @@ func initFlags() {
 	flag.IntVar(&config.ExpiryCron, "e", 5, "number of seconds between expiry cycles")
 	flag.IntVar(&config.ExpirySample, "d", 25, "sample percentage to delete from expiryLimit")
 	flag.IntVar(&config.ExpiryLimit, "l", 20, "max number of keys to be deleted")
+	flag.IntVar(&config.MaxMemory, "M", 1024, "max memory in MB to use before keys are evicted")
+	flag.StringVar(&config.EvictionStrategy, "E", "lru", "eviction strategy to use")
 
 	flag.Parse()
 }

@@ -44,6 +44,7 @@ This project is in early development. The basic server structure is in place, bu
 - [ ] Fix bugs in the RESP decoder:
   - [x] Fix DecodeCommands function which currently always returns nil
   - [ ] Fix panics
+  - [ ] Fix bug with INCR/DECR and SET
 - [x] Implement async server based on eventloop
 - [ ] Add support for windows based on IOCP
 - [x] Implement RESP encoder for proper response formatting
@@ -62,7 +63,8 @@ This project is in early development. The basic server structure is in place, bu
     - [ ] LRU
     - [ ] LFU
     - [ ] Approximate LRU
-    - [ ] Fixed
+    - [x] Random
+- [ ] Incorporate design pattern for choosing eviction strategies.
 - [ ] Add config file and refactor argument flags
 - [ ] Add support for data types/structures:
   - [x] Strings

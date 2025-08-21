@@ -84,7 +84,7 @@ func evalSET(args []string) (string, error) {
 // evalINCR op indicates value to add or subtract
 func evalADD(args []string, op int) (string, error) {
 	if len(args) <= 1 {
-		return "", errors.New("invalid number of arguments for INCR")
+		return "", errors.New("invalid number of arguments for INCR/DECR")
 	}
 	key := args[1]
 	redisObject, ok := structs.Get(key)

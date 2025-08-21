@@ -55,8 +55,12 @@ func TestEvalGet(t *testing.T) {
 
 func TestEvalSet(t *testing.T) {
 	cases := map[*structs.RedisCommands]string{
-		&structs.RedisCommands{Cmd: "SET", Args: nil}:                  "invalid number of arguments",
-		&structs.RedisCommands{Cmd: "SET", Args: []string{"K1", "10"}}: "PONG OK",
+		&structs.RedisCommands{Cmd: "SET", Args: nil}:                                "invalid number of arguments",
+		&structs.RedisCommands{Cmd: "SET", Args: []string{"K1", "10"}}:               "OK",
+		&structs.RedisCommands{Cmd: "SET", Args: []string{"K1", "10", "EX", "10"}}:   "OK",
+		&structs.RedisCommands{Cmd: "SET", Args: []string{"K1", "10", "YOLO", "10"}}: "OK",
+		&structs.RedisCommands{Cmd: "SET", Args: []string{"K1", "10", "EX"}}:         "expiry value missing for EX",
+		&structs.RedisCommands{Cmd: "SET", Args: []string{"K1", "10", "EX", "-2"}}:   "invalid or out of range expiry value",
 	}
 	for in, out := range cases {
 		actual, err := Eval(in)
@@ -71,8 +75,8 @@ func TestEvalSet(t *testing.T) {
 
 func TestEvalIncr(t *testing.T) {
 	cases := map[*structs.RedisCommands]string{
-		&structs.RedisCommands{Cmd: "INCR", Args: nil}:            "PONG",
-		&structs.RedisCommands{Cmd: "INCR", Args: []string{"K1"}}: "PONG OK",
+		&structs.RedisCommands{Cmd: "INCR", Args: nil}:            "invalid number of arguments for INCR/DECR",
+		&structs.RedisCommands{Cmd: "INCR", Args: []string{"K1"}}: "OK",
 	}
 	for in, out := range cases {
 		actual, err := Eval(in)
@@ -87,8 +91,8 @@ func TestEvalIncr(t *testing.T) {
 
 func TestEvalDecr(t *testing.T) {
 	cases := map[*structs.RedisCommands]string{
-		&structs.RedisCommands{Cmd: "DECR", Args: nil}:            "PONG",
-		&structs.RedisCommands{Cmd: "DECR", Args: []string{"K1"}}: "PONG OK",
+		&structs.RedisCommands{Cmd: "DECR", Args: nil}:            "invalid number of arguments for INCR/DECR",
+		&structs.RedisCommands{Cmd: "DECR", Args: []string{"K1"}}: "OK",
 	}
 	for in, out := range cases {
 		actual, err := Eval(in)
@@ -122,8 +126,10 @@ func TestEvalDel(t *testing.T) {
 
 func TestEvalTtl(t *testing.T) {
 	cases := map[*structs.RedisCommands]string{
-		&structs.RedisCommands{Cmd: "TTL", Args: nil}:            "invalid number of arguments for TTL",
-		&structs.RedisCommands{Cmd: "TTL", Args: []string{"K1"}}: "PONG OK",
+		&structs.RedisCommands{Cmd: "TTL", Args: nil}:                    "invalid number of arguments for TTL",
+		&structs.RedisCommands{Cmd: "TTL", Args: []string{"K1"}}:         "-1",
+		&structs.RedisCommands{Cmd: "TTL", Args: []string{"K2"}}:         "",
+		&structs.RedisCommands{Cmd: "TTL", Args: []string{"NOT_EXISTS"}}: "-2",
 	}
 	for in, out := range cases {
 		actual, err := Eval(in)
