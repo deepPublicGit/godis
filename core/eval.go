@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Eval(commands *structs.RedisCommands) (any, error) {
+func Eval(commands *structs.RedisCmd) (any, error) {
 	switch commands.Cmd {
 	case "PING":
 		return evalPING(commands.Args)

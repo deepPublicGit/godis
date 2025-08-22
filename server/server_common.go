@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func readClient(conn io.ReadWriter) (*structs.RedisCommands, error) {
+func readClient(conn io.ReadWriter) (*structs.RedisCmd, error) {
 	buffer := make([]byte, 256)
 	size, err := conn.Read(buffer)
 	if err != nil {
@@ -19,7 +19,7 @@ func readClient(conn io.ReadWriter) (*structs.RedisCommands, error) {
 		return nil, err
 	}
 
-	return &structs.RedisCommands{
+	return &structs.RedisCmd{
 		Cmd:  strings.ToUpper(commands[0]),
 		Args: commands[1:],
 	}, nil

@@ -66,6 +66,7 @@ This project is in early development. The basic server structure is in place, bu
     - [x] Random
 - [ ] Incorporate design pattern for choosing eviction strategies.
 - [ ] Add config file and refactor argument flags
+- [ ] Add command chaining
 - [ ] Add support for data types/structures:
   - [x] Strings
   - [ ] Lists
@@ -74,7 +75,7 @@ This project is in early development. The basic server structure is in place, bu
   - [ ] HyperLogLog
 - [ ] Improve Naive Implementation of Delete & Expiry
 - [ ] Improve error handling
-- [ ] Add comprehensive tests
+- [ ] Add integration tests
 - [ ] Add benchmarking
 - [ ] Add Redis CLI using Charm / Bubble Tea
 - [ ] Add persistence options
